@@ -3,5 +3,3 @@ class Adder
     first + second
   end
 end
-
-puts Adder.new.add(1, 2)

@@ -2,15 +2,19 @@
 
 require 'fileutils'
 
-module Rubyc
+module RubyC
   class Fixture
     attr_reader :source_file
 
     def initialize(source_file)
       @source_file = source_file
+      @built = false
+      @required = false
     end
 
     def build!
+      return if @built
+
       FileUtils.mkdir_p(ext_dir)
 
       Dir.chdir(ext_dir) do
@@ -25,15 +29,21 @@ module Rubyc
 
         File.write(
           "#{ext_name}.c",
-          Rubyc.transpile(File.read(source_file), ext_name)
+          RubyC.transpile(source_file, ext_name)
         )
 
         system 'ruby extconf.rb'
+        system 'make'
       end
+
+      @built = true
     end
 
-    def load!
-      load File.join(ext_dir, ext_name)
+    def require!
+      return if @required
+
+      require File.join(ext_dir, ext_name)
+      @required = true
     end
 
     private
