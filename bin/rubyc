@@ -1,7 +1,67 @@
 #! /usr/bin/env ruby
 
 require 'rubyc'
-require 'syntax_tree'
+require 'optparse'
 
-require 'pry-byebug' # remove me
-puts RubyC.transpile(ARGV[0])
+module RubyC
+  class CLI
+    def self.parse(args)
+      options = {}
+
+      option_parser = OptionParser.new do |parser|
+        parser.banner = 'Usage: rubyc options file'
+
+        parser.on('-x', '--ext-name EXT_NAME', 'The name of the resulting C extension (required).') do |x|
+          options[:ext_name] = x
+        end
+
+        parser.on('-h', '--help', 'Prints this help') do
+          puts parser
+          exit 0
+        end
+      end
+
+      option_parser.parse!(args)
+      options[:file] = ARGV.shift
+
+      new(options, option_parser)
+    end
+
+    def initialize(options, option_parser)
+      @options = options
+      @option_parser = option_parser
+
+      validate!
+    end
+
+    def run!
+      puts RubyC.transpile(file, ext_name)
+    end
+
+    private
+
+    def validate!
+      unless ext_name
+        STDERR.puts 'Must specify the name of the resulting C extension via the --ext-name flag.'
+        STDERR.puts @option_parser
+        exit 1
+      end
+
+      unless file
+        STDERR.puts 'Must specify a file to transpile.'
+        STDERR.puts @option_parser
+        exit 1
+      end
+    end
+
+    def ext_name
+      @options[:ext_name]
+    end
+
+    def file
+      @options[:file]
+    end
+  end
+end
+
+RubyC::CLI.parse(ARGV).run!

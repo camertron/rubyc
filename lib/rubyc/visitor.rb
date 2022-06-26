@@ -33,7 +33,7 @@ module RubyC
       method = MethodScope.new(current_scope, node)
       @scope_stack.push(method)
 
-      doc.init_func.write_c_line("rb_define_method(#{current_scope.parent_scope.c_name}, \"#{method.name}\", #{method.c_name}, #{method.params.arity});")
+      doc.init_func.write_c_line("rb_define_method(#{current_scope.parent_scope.c_name || 'rb_mKernel'}, \"#{method.name}\", #{method.c_name}, #{method.params.arity});")
       doc.signatures.write_c(method.signature)
       doc.signatures.write_c_line(';')
 

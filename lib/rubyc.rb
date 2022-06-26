@@ -1,4 +1,6 @@
-# require_relative '../ext/rubyc_test'
+# frozen_string_literal: true
+
+require 'syntax_tree'
 
 module RubyC
   autoload :ClassScope,    'rubyc/class_scope'
